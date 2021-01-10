@@ -96,8 +96,8 @@ public class Camera {
   private PictureCaptureRequest pictureCaptureRequest;
   private CameraRegions cameraRegions;
   private int exposureOffset;
-  private boolean useAutoFocus = true;
-
+  private boolean useAutoFocus = false;
+  
   public Camera(
       final Activity activity,
       final SurfaceTextureEntry flutterTexture,
