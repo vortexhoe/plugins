@@ -97,7 +97,6 @@ public class Camera {
   private CameraRegions cameraRegions;
   private int exposureOffset;
   private boolean useAutoFocus = true;
-  private Range<Integer> fpsRange;
 
   public Camera(
       final Activity activity,
@@ -133,7 +132,6 @@ public class Camera {
     orientationEventListener.enable();
 
     cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraName);
-    initFps(cameraCharacteristics);
     sensorOrientation = cameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
     isFrontFacing =
         cameraCharacteristics.get(CameraCharacteristics.LENS_FACING)
@@ -147,27 +145,6 @@ public class Camera {
         new CameraZoom(
             cameraCharacteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE),
             cameraCharacteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM));
-  }
-
-  private void initFps(CameraCharacteristics cameraCharacteristics) {
-    try {
-      Range<Integer>[] ranges =
-          cameraCharacteristics.get(CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES);
-      if (ranges != null) {
-        for (Range<Integer> range : ranges) {
-          int upper = range.getUpper();
-          Log.i("Camera", "[FPS Range Available] is:" + range);
-          if (upper >= 10) {
-            if (fpsRange == null || upper < fpsRange.getUpper()) {
-              fpsRange = range;
-            }
-          }
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    Log.i("Camera", "[FPS Range] is:" + fpsRange);
   }
 
   private void prepareMediaRecorder(String outputFilePath) throws IOException {
@@ -293,7 +270,6 @@ public class Camera {
             }
             cameraCaptureSession = session;
 
-            updateFpsRange();
             updateAutoFocus();
             updateFlash(flashMode);
             updateExposure(exposureMode);
@@ -887,14 +863,6 @@ public class Camera {
     }
 
     result.success(null);
-  }
-
-  private void updateFpsRange() {
-    if (fpsRange == null) {
-      return;
-    }
-
-    captureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, fpsRange);
   }
 
   private void updateAutoFocus() {
